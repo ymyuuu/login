@@ -1,0 +1,36 @@
+name: Login to ct8
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '41 9 */7 * *'
+
+env:
+  CT8: ${{ secrets.CT8 }}
+
+jobs:  
+  login:  
+    runs-on: ubuntu-latest  
+  
+    steps:  
+      - name: Checkout repository  
+        uses: actions/checkout@v4
+  
+      - name: Set up Node.js  
+        uses: actions/setup-node@v4
+        with:  
+          node-version: '20.x'  
+  
+      - name: Install dependencies  
+        run: npm install puppeteer  
+  
+      - name: Create accounts.json  
+        run: echo "$CT8" > accounts.json  
+  
+      - name: Login to ct8
+        run: |  
+          set -e  
+          xvfb-run --server-args="-screen 0 1280x1024x24" node login.js
