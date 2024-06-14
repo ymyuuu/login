@@ -1,4 +1,4 @@
-name: Login to ct8
+name: Login to CT8
 
 on:
   workflow_dispatch:
@@ -30,7 +30,7 @@ jobs:
       - name: Create accounts.json  
         run: echo "$CT8" > accounts.json  
   
-      - name: Login to ct8
+      - name: Login to CT8
         run: |  
           set -e  
           xvfb-run --server-args="-screen 0 1280x1024x24" node ct8.js
