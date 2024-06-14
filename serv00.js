@@ -11,8 +11,8 @@ async function delayTime(ms) {
 
 (async () => {
   // 读取 accounts.json 中的 JSON 字符串
-  const accountsJson = fs.readFileSync('accounts.json', 'utf-8');
-  const accounts = JSON.parse(accountsJson);
+  const serv00 = fs.readFileSync('accounts.json', 'utf-8');
+  const accounts = JSON.parse(serv00);
 
   for (const account of accounts) {
     const { username, password, panelnum } = account;
@@ -56,7 +56,7 @@ async function delayTime(ms) {
 
       if (isLoggedIn) {
         // 获取当前的UTC时间和北京时间
-        const nowUtc = formatToISO(new Date());// UTC时间
+        const nowUtc = formatToISO(new Date()); // UTC时间
         const nowBeijing = formatToISO(new Date(new Date().getTime() + 8 * 60 * 60 * 1000)); // 北京时间东8区，用算术来搞
         console.log(`账号 ${username} 于北京时间 ${nowBeijing}（UTC时间 ${nowUtc}）登录成功！`);
       } else {
