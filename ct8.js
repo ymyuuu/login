@@ -3,7 +3,7 @@ const puppeteer = require('puppeteer');
 
 // 将日期格式化为 ISO 格式的函数
 function formatToISO(date) {
-  return date.toISOString().replace('T', ' ').replace('Z', '')。replace(/\.\d{3}Z/， '');
+  return date.toISOString().replace('T', ' ').replace('Z', '').replace(/\.\d{3}Z/, '');
 }
 
 // 延时函数
