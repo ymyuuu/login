@@ -1,5 +1,6 @@
 const fs = require('fs');
 const puppeteer = require('puppeteer');
+const nodemailer = require('nodemailer');
 
 // 将日期格式化为 ISO 格式的函数
 function formatToISO(date) {
@@ -8,6 +9,12 @@ function formatToISO(date) {
 
 // 读取 accounts.json 文件
 function readAccounts(filename) {
+  const data = fs.readFileSync(filename, 'utf-8');
+  return JSON.parse(data);
+}
+
+// 读取 email.json 文件
+function readEmailConfig(filename) {
   const data = fs.readFileSync(filename, 'utf-8');
   return JSON.parse(data);
 }
@@ -67,20 +74,41 @@ async function login(account, maxRetries = 3) {
   return false;
 }
 
+// 发送邮件函数
+async function sendEmail(subject, text) {
+  const emailConfig = readEmailConfig('email.json');
+  const transporter = nodemailer.createTransport({
+    host: emailConfig.host,
+    port: emailConfig.port,
+    secure: emailConfig.secure,
+    auth: emailConfig.auth,
+  });
+
+  const mailOptions = {
+    from: emailConfig.auth.user,
+    to: emailConfig.to,
+    subject: subject,
+    text: text,
+  };
+
+  await transporter.sendMail(mailOptions);
+}
+
 // 主函数
 (async () => {
   const accounts = readAccounts('accounts.json');
   const totalAccounts = accounts.length;
   let successfulLogins = 0;
   let failedLogins = 0;
+  let failedAccounts = [];
 
   for (const account of accounts) {
     const success = await login(account);
     if (success) {
       successfulLogins++;
     } else {
-      console.error(`账号 ${account.username} 登录失败，请检查账号和密码是否正确。`);
       failedLogins++;
+      failedAccounts.push(account.username);
     }
   }
 
@@ -89,4 +117,13 @@ async function login(account, maxRetries = 3) {
   console.log(`总共需要登录的账号数: ${totalAccounts}`);
   console.log(`成功登录的账号数: ${successfulLogins}`);
   console.log(`登录失败的账号数: ${failedLogins}`);
+
+  // 发送邮件通知
+  const subject = 'CT8 登录结果';
+  let text = `所有账号登录完成！\n总共需要登录的账号数: ${totalAccounts}\n成功登录的账号数: ${successfulLogins}\n登录失败的账号数: ${failedLogins}`;
+  if (failedAccounts.length > 0) {
+    text += `\n登录失败的账号: ${failedAccounts.join(', ')}`;
+  }
+
+  await sendEmail(subject, text);
 })();
