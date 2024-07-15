@@ -52,29 +52,24 @@ async function login(account, maxRetries = 3) {
         return logoutButton !== null;
       });
 
-      await page.close();
-      await browser.close();
-
       if (isLoggedIn) {
         const nowBeijing = formatToISO(new Date(new Date().getTime() + 8 * 60 * 60 * 1000)); // 北京时间
         console.log(`账号 ${username} 于北京时间 ${nowBeijing} 登录成功！`);
+        await browser.close();
         return true;
-      } else {
-        if (attempt === maxRetries) {
-          console.error(`账号 ${username} 登录失败，请检查账号和密码是否正确。`);
-          return false;
-        }
       }
     } catch (error) {
+      // 如果达到最大重试次数且仍然失败，则记录错误
       if (attempt === maxRetries) {
         console.error(`账号 ${username} 登录时出现错误: ${error}`);
-        return false;
       }
     } finally {
+      // 确保页面和浏览器在任何情况下都被正确关闭
       await page.close();
       await browser.close();
     }
   }
+  return false;
 }
 
 // 主函数
