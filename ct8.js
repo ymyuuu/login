@@ -130,7 +130,7 @@ async function sendEmail(subject, text) {
 		const nowBeijing = formatToISO(getBeijingTime());
 		const subject = 'CT8 登录结果';
 		let text =
-			`登录失败的账号数: ${failedLogins}\n登录失败的账号: ${failedAccounts.join(', ')}\n ${nowBeijing}`;
+			`失败账号数: ${failedLogins}\n失败的账号: ${failedAccounts.join(', ')}\n ${nowBeijing}`;
 
 		await sendEmail(subject, text);
 	}
