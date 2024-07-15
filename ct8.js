@@ -60,14 +60,19 @@ async function login(account, maxRetries = 3) {
         console.log(`账号 ${username} 于北京时间 ${nowBeijing} 登录成功！`);
         return true;
       } else {
-        console.error(`账号 ${username} 登录失败，请检查账号和密码是否正确。`);
-        if (attempt === maxRetries) return false;
+        if (attempt === maxRetries) {
+          console.error(`账号 ${username} 登录失败，请检查账号和密码是否正确。`);
+          return false;
+        }
       }
     } catch (error) {
-      console.error(`账号 ${username} 登录时出现错误 (尝试 ${attempt}/${maxRetries}): ${error}`);
+      if (attempt === maxRetries) {
+        console.error(`账号 ${username} 登录时出现错误: ${error}`);
+        return false;
+      }
+    } finally {
       await page.close();
       await browser.close();
-      if (attempt === maxRetries) return false;
     }
   }
 }
@@ -81,7 +86,7 @@ async function login(account, maxRetries = 3) {
   let failedLogins = 0;
 
   // 控制并发数
-  const limit = pLimit(10); // 最大并发数为 5
+  const limit = pLimit(50); // 最大并发数为 5
   const loginPromises = accounts.map(account => limit(async () => {
     const success = await login(account);
     if (success) {
