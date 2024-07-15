@@ -69,7 +69,7 @@ async function login(account, maxRetries = 3) {
 			});
 
 			if (isLoggedIn) {
-				console.log(`${username} 成功`);
+				console.log(`${username} success`);
 				await browser.close();
 				return true;
 			}
@@ -80,7 +80,7 @@ async function login(account, maxRetries = 3) {
 		}
 	}
 
-	console.log(`${username} 失败`);
+	console.log(`${username} failed`);
 	return false;
 }
 
