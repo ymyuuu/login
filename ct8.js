@@ -1,6 +1,5 @@
 const fs = require('fs');
 const puppeteer = require('puppeteer');
-const pLimit = require('p-limit');
 
 // 将日期格式化为 ISO 格式的函数
 function formatToISO(date) {
@@ -56,7 +55,7 @@ async function login(account) {
 
     if (isLoggedIn) {
       const nowBeijing = formatToISO(new Date(new Date().getTime() + 8 * 60 * 60 * 1000)); // 北京时间
-      console.log(`账号 ${username} 于 ${nowBeijing} 登录成功！`);
+      console.log(`账号 ${username} 于北京时间 ${nowBeijing} 登录成功！`);
       return true;
     } else {
       console.error(`账号 ${username} 登录失败，请检查账号和密码是否正确。`);
@@ -72,6 +71,7 @@ async function login(account) {
 
 // 主函数
 (async () => {
+  const pLimit = (await import('p-limit')).default; // 动态导入 p-limit
   const accounts = readAccounts('accounts.json');
   const totalAccounts = accounts.length;
   let successfulLogins = 0;
@@ -92,6 +92,7 @@ async function login(account) {
   await Promise.all(loginPromises);
 
   // 输出总结信息
+  console.log(`所有账号登录完成！`);
   console.log(`总共需要登录的账号数: ${totalAccounts}`);
   console.log(`成功登录的账号数: ${successfulLogins}`);
   console.log(`登录失败的账号数: ${failedLogins}`);
