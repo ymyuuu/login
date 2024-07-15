@@ -75,6 +75,8 @@ async function login(account, maxRetries = 3) {
       await browser.close();
     }
   }
+
+  console.log(`账号 ${username} 登录失败`);
   return false;
 }
 
