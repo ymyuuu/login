@@ -86,7 +86,7 @@ async function login(account, maxRetries = 3) {
   let failedLogins = 0;
 
   // 控制并发数
-  const limit = pLimit(50); // 最大并发数为 5
+  const limit = pLimit(5); // 最大并发数为 5
   const loginPromises = accounts.map(account => limit(async () => {
     const success = await login(account);
     if (success) {
