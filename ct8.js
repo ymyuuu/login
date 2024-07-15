@@ -7,6 +7,11 @@ function formatToISO(date) {
   return date.toISOString().replace('T', ' ').replace('Z', '');
 }
 
+// 获取北京时间
+function getBeijingTime() {
+  return new Date(new Date().getTime() + 8 * 60 * 60 * 1000);
+}
+
 // 读取 accounts.json 文件
 function readAccounts(filename) {
   const data = fs.readFileSync(filename, 'utf-8');
@@ -60,8 +65,7 @@ async function login(account, maxRetries = 3) {
       });
 
       if (isLoggedIn) {
-        const nowBeijing = formatToISO(new Date(new Date().getTime() + 8 * 60 * 60 * 1000)); // 北京时间
-        console.log(`账号 ${username} 于北京时间 ${nowBeijing} 登录成功！`);
+        console.log(`账号 ${username} 登录成功！`);
         await browser.close();
         return true;
       }
@@ -118,12 +122,12 @@ async function sendEmail(subject, text) {
   console.log(`成功登录的账号数: ${successfulLogins}`);
   console.log(`登录失败的账号数: ${failedLogins}`);
 
-  // 发送邮件通知
-  const subject = 'CT8 登录结果';
-  let text = `所有账号登录完成！\n总共需要登录的账号数: ${totalAccounts}\n成功登录的账号数: ${successfulLogins}\n登录失败的账号数: ${failedLogins}`;
+  // 发送邮件通知，如果有失败的账号
   if (failedAccounts.length > 0) {
-    text += `\n登录失败的账号: ${failedAccounts.join(', ')}`;
-  }
+    const nowBeijing = formatToISO(getBeijingTime());
+    const subject = 'CT8 登录结果';
+    let text = `所有账号登录完成！\n总共需要登录的账号数: ${totalAccounts}\n成功登录的账号数: ${successfulLogins}\n登录失败的账号数: ${failedLogins}\n登录失败的账号: ${failedAccounts.join(', ')}\n邮件发送时间: 北京时间 ${nowBeijing}`;
 
-  await sendEmail(subject, text);
+    await sendEmail(subject, text);
+  }
 })();
