@@ -3,7 +3,7 @@ const puppeteer = require('puppeteer');
 
 // 将日期格式化为 ISO 格式的函数
 function formatToISO(date) {
-  return date.toISOString().replace('T', ' ').replace('Z', '').replace(/\.\d{3}Z/, '');
+  return date.toISOString().replace('T', ' ').replace('Z', '');
 }
 
 // 读取 accounts.json 文件
@@ -59,13 +59,8 @@ async function login(account, maxRetries = 3) {
         return true;
       }
     } catch (error) {
-      // 如果达到最大重试次数且仍然失败，则记录错误
-      if (attempt === maxRetries) {
-        console.error(`账号 ${username} 登录时出现错误: ${error}`);
-      }
+      // 忽略错误，继续重试
     } finally {
-      // 确保页面和浏览器在任何情况下都被正确关闭
-      await page.close();
       await browser.close();
     }
   }
@@ -74,25 +69,20 @@ async function login(account, maxRetries = 3) {
 
 // 主函数
 (async () => {
-  const pLimit = (await import('p-limit')).default; // 动态导入 p-limit
   const accounts = readAccounts('accounts.json');
   const totalAccounts = accounts.length;
   let successfulLogins = 0;
   let failedLogins = 0;
 
-  // 控制并发数
-  const limit = pLimit(5); // 最大并发数为 5
-  const loginPromises = accounts.map(account => limit(async () => {
+  for (const account of accounts) {
     const success = await login(account);
     if (success) {
       successfulLogins++;
     } else {
+      console.error(`账号 ${account.username} 登录失败，请检查账号和密码是否正确。`);
       failedLogins++;
     }
-  }));
-
-  // 等待所有登录任务完成
-  await Promise.all(loginPromises);
+  }
 
   // 输出总结信息
   console.log(`所有账号登录完成！`);
