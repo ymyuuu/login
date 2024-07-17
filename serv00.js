@@ -111,7 +111,7 @@ async function sendEmail(subject, html) {
   // 发送邮件通知，如果有失败的账号
   if (failedAccounts.length > 0) {
     const nowBeijing = formatToISO(getBeijingTime());
-    const subject = 'serv00 登录结果';
+    const subject = 'SERV00 登录结果';
     const html = `
       <p>失败账号数: <strong>${failedAccounts.length}</strong></p>
       <p>失败的账号:</p>
