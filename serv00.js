@@ -114,7 +114,8 @@ async function sendEmail(subject, html) {
     const subject = 'serv00 登录结果';
     const html = `
       <p>失败的账号数: <strong>${failedAccounts.length}</strong></p>
-      <p>失败的账号: <strong>${failedAccounts.join(', ')}</strong></p>
+      <p>失败的账号:</p>
+      <p>${failedAccounts.join('<br>')}</p>
       <br>
       <p><strong>${nowBeijing}</strong></p>
     `;
