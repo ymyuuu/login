@@ -1,39 +1,45 @@
 const fs = require('fs');
 const puppeteer = require('puppeteer');
+const nodemailer = require('nodemailer');
 
+// 将日期格式化为 ISO 格式的函数
 function formatToISO(date) {
-  return date.toISOString().replace('T', ' ').replace('Z', '').replace(/\.\d{3}Z/, '');
+  const isoString = date.toISOString();
+  const noMillis = isoString.split('.')[0];
+  return noMillis.replace('T', ' ').replace('Z', ' ');
 }
 
-async function delayTime(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+// 获取北京时间
+function getBeijingTime() {
+  return new Date(new Date().getTime() + 8 * 60 * 60 * 1000);
 }
 
-(async () => {
-  // 读取 accounts.json 中的 JSON 字符串
-  const serv00 = fs.readFileSync('accounts.json', 'utf-8');
-  const accounts = JSON.parse(serv00);
+// 读取 JSON 文件
+function readJSON(filename) {
+  const data = fs.readFileSync(filename, 'utf-8');
+  return JSON.parse(data);
+}
 
-  for (const account of accounts) {
-    const { username, password, panelnum } = account;
+// 登录函数，增加重试逻辑
+async function login(account, maxRetries = 3) {
+  const { username, password, panelnum } = account;
+  const url = `https://panel${panelnum}.serv00.com/login/?next=/`;
 
-    const browser = await puppeteer.launch({ headless: false });
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
 
-    let url = `https://panel${panelnum}.serv00.com/login/?next=/`;
-
     try {
-      // 修改网址为新的登录页面
       await page.goto(url);
 
       // 清空用户名输入框的原有值
       const usernameInput = await page.$('#id_username');
       if (usernameInput) {
-        await usernameInput.click({ clickCount: 3 }); // 选中输入框的内容
-        await usernameInput.press('Backspace'); // 删除原来的值
+        await usernameInput.click({ clickCount: 3 });
+        await usernameInput.press('Backspace');
       }
 
-      // 输入实际的账号和密码
+      // 输入账号和密码
       await page.type('#id_username', username);
       await page.type('#id_password', password);
 
@@ -45,7 +51,7 @@ async function delayTime(ms) {
         throw new Error('无法找到登录按钮');
       }
 
-      // 等待登录成功（如果有跳转页面的话）
+      // 等待登录成功
       await page.waitForNavigation();
 
       // 判断是否登录成功
@@ -55,30 +61,64 @@ async function delayTime(ms) {
       });
 
       if (isLoggedIn) {
-        // 获取当前的UTC时间和北京时间
-        const nowUtc = formatToISO(new Date()); // UTC时间
-        const nowBeijing = formatToISO(new Date(new Date().getTime() + 8 * 60 * 60 * 1000)); // 北京时间东8区，用算术来搞
-        console.log(`账号 ${username} 于北京时间 ${nowBeijing}（UTC时间 ${nowUtc}）登录成功！`);
-      } else {
-        console.error(`账号 ${username} 登录失败，请检查账号和密码是否正确。`);
+        console.log(`${username} success`);
+        await browser.close();
+        return true;
       }
     } catch (error) {
-      console.error(`账号 ${username} 登录时出现错误: ${error}`);
+      // 忽略错误，继续重试
     } finally {
-      // 关闭页面和浏览器
-      await page.close();
       await browser.close();
-
-      // 用户之间添加随机延时
-      const delay = Math.floor(Math.random() * 8000) + 1000; // 随机延时1秒到8秒之间
-      await delayTime(delay);
     }
   }
 
-  console.log('所有账号登录完成！');
-})();
-
-// 自定义延时函数
-function delayTime(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  console.log(`${username} failed`);
+  return false;
 }
+
+// 发送邮件函数
+async function sendEmail(subject, html) {
+  const emailConfig = readJSON('email.json');
+  const transporter = nodemailer.createTransport({
+    host: emailConfig.host,
+    port: emailConfig.port,
+    secure: emailConfig.secure,
+    auth: emailConfig.auth,
+  });
+
+  const mailOptions = {
+    from: emailConfig.auth.user,
+    to: emailConfig.to,
+    subject: subject,
+    html: html,
+  };
+
+  await transporter.sendMail(mailOptions);
+}
+
+// 主函数
+(async () => {
+  const accounts = readJSON('accounts.json');
+  let failedAccounts = [];
+
+  for (const account of accounts) {
+    const success = await login(account);
+    if (!success) {
+      failedAccounts.push(account.username);
+    }
+  }
+
+  // 发送邮件通知，如果有失败的账号
+  if (failedAccounts.length > 0) {
+    const nowBeijing = formatToISO(getBeijingTime());
+    const subject = 'serv00 登录结果';
+    const html = `
+      <p>失败的账号数: <strong>${failedAccounts.length}</strong></p>
+      <p>失败的账号: <strong>${failedAccounts.join(', ')}</strong></p>
+      <br>
+      <p><strong>${nowBeijing}</strong></p>
+    `;
+
+    await sendEmail(subject, html);
+  }
+})();
