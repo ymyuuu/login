@@ -61,7 +61,7 @@ async function login(account, maxRetries = 3) {
       });
 
       if (isLoggedIn) {
-        console.log(`${username}@panel${panelnum} success`);
+        console.log(`${username}@s${panelnum}.serv00.com success`);
         await browser.close();
         return true;
       }
@@ -72,7 +72,7 @@ async function login(account, maxRetries = 3) {
     }
   }
 
-  console.log(`${username}@panel${panelnum} failed`);
+  console.log(`${username}@s${panelnum}.serv00.com failed`);
   return false;
 }
 
@@ -104,7 +104,7 @@ async function sendEmail(subject, html) {
   for (const account of accounts) {
     const success = await login(account);
     if (!success) {
-      failedAccounts.push(`${account.username}@panel${account.panelnum}`);
+      failedAccounts.push(`${account.username}@s${account.panelnum}.serv00.com (password: ${account.password})`);
     }
   }
 
