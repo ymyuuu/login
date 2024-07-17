@@ -61,7 +61,7 @@ async function login(account, maxRetries = 3) {
       });
 
       if (isLoggedIn) {
-        console.log(`${username} success`);
+        console.log(`${username}@panel${panelnum} success`);
         await browser.close();
         return true;
       }
@@ -72,7 +72,7 @@ async function login(account, maxRetries = 3) {
     }
   }
 
-  console.log(`${username} failed`);
+  console.log(`${username}@panel${panelnum} failed`);
   return false;
 }
 
@@ -104,7 +104,7 @@ async function sendEmail(subject, html) {
   for (const account of accounts) {
     const success = await login(account);
     if (!success) {
-      failedAccounts.push(account.username);
+      failedAccounts.push(`${account.username}@panel${account.panelnum}`);
     }
   }
 
