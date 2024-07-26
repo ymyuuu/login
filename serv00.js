@@ -61,7 +61,7 @@ async function login(account, maxRetries = 3) {
       });
 
       if (isLoggedIn) {
-        console.log(`${username}@s${panelnum}.serv00.com success`);
+        // console.log(`${username}@s${panelnum}.serv00.com success`);
         await browser.close();
         return true;
       }
@@ -122,4 +122,5 @@ async function sendEmail(subject, html) {
 
     await sendEmail(subject, html);
   }
+  console.log("处理完成");
 })();
