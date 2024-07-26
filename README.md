@@ -1,4 +1,4 @@
-### `email.json`
+### email.json
 `email.json` 用于配置发送邮件的 SMTP 服务器信息和收件人的电子邮件地址。
 
 #### 示例内容
@@ -24,7 +24,7 @@
   - **pass**: 邮箱密码或应用专用密码。
 - **to**: 接收邮件的邮箱地址。
 
-### `ct8.json`
+### ct8.json
 `ct8.json` 用于配置 CT8 账号的登录信息。
 
 #### 示例内容
@@ -49,7 +49,7 @@
 - **username**: 登录账号的用户名。
 - **password**: 登录账号的密码。
 
-### `server00.json`
+### server00.json
 `server00.json` 用于配置 SERV00 账号的登录信息，包括面板编号（`panelnum`）。
 
 #### 示例内容
