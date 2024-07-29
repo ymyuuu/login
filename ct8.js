@@ -69,7 +69,7 @@ async function login(account, maxRetries = 3) {
 			});
 
 			if (isLoggedIn) {
-				// console.log(`${username} success`);
+				console.log(`${username} success`);
 				await browser.close();
 				return true;
 			}
