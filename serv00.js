@@ -61,7 +61,7 @@ async function login(account, maxRetries = 3) {
       });
 
       if (isLoggedIn) {
-        console.log(`${username}@s${panelnum}.serv00.com success`);
+        // console.log(`${username}@s${panelnum}.serv00.com success`);
         await browser.close();
         return true;
       }
