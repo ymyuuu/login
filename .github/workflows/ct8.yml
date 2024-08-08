@@ -26,7 +26,7 @@ jobs:
           node-version: '20.x'  
   
       - name: Install dependencies  
-        run: npm install puppeteer nodemailer
+        run: npm install puppeteer puppeteer-extra puppeteer-extra-plugin-stealth nodemailer user-agents
   
       - name: Create accounts.json  
         run: echo "$CT8" > accounts.json
