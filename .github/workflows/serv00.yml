@@ -6,7 +6,7 @@ on:
     branches:
       - main
   schedule:
-    - cron: '0 */3 * * *'  # 每三小时运行一次
+    - cron: '*/30 * * * *'  # 每半小时运行一次
 
 env:
   SERV00: ${{ secrets.SERV00 }}
