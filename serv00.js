@@ -92,7 +92,7 @@ async function login(account, maxRetries = 10) { // 将默认重试次数设置�
       });
 
       if (isLoggedIn) {
-        // console.log(`${username}@s${panelnum}.serv00.com success`); // 登录成功的日志输出
+        console.log(`${username}@s${panelnum}.serv00.com success`); // 登录成功的日志输出
         await browser.close(); // 关闭浏览器
         return true; // 返回成功
       }
