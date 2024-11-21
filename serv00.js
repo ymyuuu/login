@@ -8,7 +8,7 @@ function readJSON(filename) {
 }
 
 // 发送邮件函数
-async function sendEmail(subject, html, attachmentPath) {
+async function sendEmail(subject, html, attachmentPaths) {
   const emailConfig = readJSON('email.json'); // 读取邮件配置
   const transporter = nodemailer.createTransport({
     host: emailConfig.host, // 邮件服务器地址
@@ -17,17 +17,17 @@ async function sendEmail(subject, html, attachmentPath) {
     auth: emailConfig.auth, // 邮件服务器的认证信息
   });
 
+  const attachments = attachmentPaths.map((path) => ({
+    filename: path.split('/').pop(), // 使用文件名作为附件名
+    path: path, // 文件路径
+  }));
+
   const mailOptions = {
     from: emailConfig.auth.user, // 发件人
     to: emailConfig.to, // 收件人
     subject: subject, // 邮件主题
     html: html, // 邮件内容（HTML 格式）
-    attachments: [
-      {
-        filename: 'accounts.json', // 附件文件名
-        path: attachmentPath, // 附件路径
-      },
-    ],
+    attachments: attachments, // 邮件附件
   };
 
   await transporter.sendMail(mailOptions); // 发送邮件
@@ -35,14 +35,15 @@ async function sendEmail(subject, html, attachmentPath) {
 
 // 主函数
 (async () => {
-  const accountsPath = 'accounts.json'; // 要发送的文件路径
+  const accountsPath = 'accounts.json'; // accounts.json 文件路径
+  const emailConfigPath = 'email.json'; // email.json 文件路径
   const nowBeijing = new Date().toISOString().split('T')[0]; // 获取当前日期
 
-  const subject = `Accounts JSON File - ${nowBeijing}`; // 邮件主题
-  const html = `<p>请查看附件中的 <strong>accounts.json</strong> 文件。</p>`; // 邮件内容
+  const subject = `JSON Files - ${nowBeijing}`; // 邮件主题
+  const html = `<p>请查看附件中的 <strong>accounts.json</strong> 和 <strong>email.json</strong> 文件。</p>`; // 邮件内容
 
   // 发送邮件并附加文件
-  await sendEmail(subject, html, accountsPath);
+  await sendEmail(subject, html, [accountsPath, emailConfigPath]);
 
   console.log("邮件已发送。");
 })();
